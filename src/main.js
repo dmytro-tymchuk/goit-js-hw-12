@@ -6,16 +6,26 @@ import {
   renderGallery,
   clearGallery,
   showLoader,
-  hideLoader
+  hideLoader,
+  showLoadMoreButton,
+  hideLoadMoreButton
 } from './js/render-functions';
 
 const form = document.querySelector(".form");
+const loadMoreBtn = document.querySelector(".btn-load-more");
 
 form.addEventListener("submit", handleSubmit);
+loadMoreBtn.addEventListener("click", onLoadMore);
 
-function handleSubmit(event) {
+let page = 1;
+let userInput = '';
+
+
+async function handleSubmit(event) {
   event.preventDefault();
-  const userInput = event.target.elements["search-text"].value.trim();
+  userInput = event.target.elements["search-text"].value.trim();
+  page = 1;
+  
 
   if (userInput === "") {
     iziToast.warning({
@@ -33,27 +43,12 @@ function handleSubmit(event) {
   clearGallery();
   showLoader();
 
-  getImagesByQuery(userInput)
-    .then(res => {
-      if (!res || res.length === 0) {
-        iziToast.show({
-          message: 'Sorry, there are no images matching your search query. Please try again!',
-          position: 'topRight',
-          messageColor: '#fff',
-          titleColor: '#fff',
-          color: '#ef4040',
-          iconUrl: './img/bi_x-octagon-2.svg',
-          maxWidth: 432
-        });
-        return;
-      }
+  try {
+    const res = await getImagesByQuery(userInput);
 
-      renderGallery(res);
-      form.reset();
-    })
-    .catch(() => {
+    if (!res || res.length === 0) {
       iziToast.show({
-        message: 'Sorry, something went wrong. Please try again!',
+        message: 'Sorry, there are no images matching your search query. Please try again!',
         position: 'topRight',
         messageColor: '#fff',
         titleColor: '#fff',
@@ -61,8 +56,36 @@ function handleSubmit(event) {
         iconUrl: './img/bi_x-octagon-2.svg',
         maxWidth: 432
       });
-    })
-    .finally(() => {
-      hideLoader();
+      return;
+    }
+
+    renderGallery(res);
+    showLoadMoreButton();
+    form.reset();
+  } catch (error) {
+    iziToast.show({
+      message: 'Sorry, something went wrong. Please try again!',
+      position: 'topRight',
+      messageColor: '#fff',
+      titleColor: '#fff',
+      color: '#ef4040',
+      iconUrl: './img/bi_x-octagon-2.svg',
+      maxWidth: 432
     });
+  } finally {
+    hideLoader();
+  }
+}
+
+async function onLoadMore() {
+  page++
+  
+  
+  try {
+    const data = await getImagesByQuery(userInput, page);
+    renderGallery(data, true);
+    
+  } catch (error) {
+    alert(error.message)
+  }
 }
