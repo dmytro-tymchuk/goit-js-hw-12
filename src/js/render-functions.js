@@ -4,6 +4,9 @@ import "simplelightbox/dist/simple-lightbox.min.css";
 let lightbox = null;
 const gallery = document.querySelector(".gallery");
 const loader = document.querySelector(".loader");
+const loaderContainer = document.querySelector(".loader-container");
+const loaderMore = document.querySelector(".loader-more")
+const loaderMoreContainer = document.querySelector(".loader-more-container");
 const btnLoadMore = document.querySelector(".btn-load-more");
 
 export function createMarkup(arr) {
@@ -48,11 +51,29 @@ export function clearGallery() {
 
 export function showLoader() {
   loader.classList.remove("hidden");
+  loaderContainer.style.display = 'flex';
+
 }
 
 export function hideLoader() {
   loader.classList.add("hidden");
+  loaderContainer.style.display = 'none';
+
 }
+
+
+export function showLoaderMore() {
+  loaderMore.classList.remove("hidden");
+  loaderMoreContainer.style.display = 'flex';
+
+}
+
+export function hideLoaderMore() {
+  loaderMore.classList.add("hidden");
+  loaderMoreContainer.style.display = 'none';
+}
+
+
 
 export function showLoadMoreButton() {
   btnLoadMore.classList.remove("hidden");

@@ -8,7 +8,9 @@ import {
   showLoader,
   hideLoader,
   showLoadMoreButton,
-  hideLoadMoreButton
+  hideLoadMoreButton,
+  hideLoaderMore,
+  showLoaderMore
 } from './js/render-functions';
 
 const form = document.querySelector(".form");
@@ -19,6 +21,9 @@ loadMoreBtn.addEventListener("click", onLoadMore);
 
 let page = 1;
 let userInput = '';
+let totalHitsAvailable = 0;
+
+
 
 
 async function handleSubmit(event) {
@@ -45,8 +50,10 @@ async function handleSubmit(event) {
 
   try {
     const res = await getImagesByQuery(userInput);
+    
+    totalHitsAvailable = res.totalHits;
 
-    if (!res || res.length === 0) {
+    if (!res.hits || res.hits.length === 0) {
       iziToast.show({
         message: 'Sorry, there are no images matching your search query. Please try again!',
         position: 'topRight',
@@ -56,10 +63,11 @@ async function handleSubmit(event) {
         iconUrl: './img/bi_x-octagon-2.svg',
         maxWidth: 432
       });
+      hideLoadMoreButton();
       return;
     }
 
-    renderGallery(res);
+    renderGallery(res.hits);
     showLoadMoreButton();
     form.reset();
   } catch (error) {
@@ -79,13 +87,33 @@ async function handleSubmit(event) {
 
 async function onLoadMore() {
   page++
-  
-  
+  hideLoadMoreButton();
+  showLoaderMore();
+  const IMAGES_PER_PAGE = 15;
+const maxPage = Math.ceil(totalHitsAvailable / IMAGES_PER_PAGE);
   try {
+    
+    if (page > maxPage) {
+      iziToast.show({
+      message: 'We are sorry, but you haveve reached the end of search results.',
+      position: 'topRight',
+      messageColor: '#fff',
+      titleColor: '#fff',
+      color: '#ef4040',
+      iconUrl: './img/bi_x-octagon-2.svg',
+      maxWidth: 432
+      });
+      hideLoadMoreButton();
+      return
+    }
     const data = await getImagesByQuery(userInput, page);
-    renderGallery(data, true);
+    renderGallery(data.hits, true);
+    showLoadMoreButton();
     
   } catch (error) {
     alert(error.message)
+  } finally {
+    hideLoaderMore();
   }
 }
+
