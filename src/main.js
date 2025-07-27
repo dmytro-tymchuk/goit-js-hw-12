@@ -92,7 +92,6 @@ async function onLoadMore() {
   const IMAGES_PER_PAGE = 15;
 const maxPage = Math.ceil(totalHitsAvailable / IMAGES_PER_PAGE);
   try {
-    
     if (page > maxPage) {
       iziToast.show({
       message: 'We are sorry, but you haveve reached the end of search results.',
@@ -108,6 +107,12 @@ const maxPage = Math.ceil(totalHitsAvailable / IMAGES_PER_PAGE);
     }
     const data = await getImagesByQuery(userInput, page);
     renderGallery(data.hits, true);
+    const div = document.querySelector(".wrap");
+    const divHeight = div.getBoundingClientRect().height;
+    window.scrollBy({
+      top: divHeight * 6,
+      behavior: "smooth"
+    });
     showLoadMoreButton();
     
   } catch (error) {
