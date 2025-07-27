@@ -23,11 +23,9 @@ let page = 1;
 let userInput = '';
 let totalHitsAvailable = 0;
 
-
-
-
 async function handleSubmit(event) {
   event.preventDefault();
+  hideLoadMoreButton();
   userInput = event.target.elements["search-text"].value.trim();
   page = 1;
   
@@ -49,7 +47,7 @@ async function handleSubmit(event) {
   showLoader();
 
   try {
-    const res = await getImagesByQuery(userInput);
+    const res = await getImagesByQuery(userInput, page);
     
     totalHitsAvailable = res.totalHits;
 
@@ -68,7 +66,13 @@ async function handleSubmit(event) {
     }
 
     renderGallery(res.hits);
+      const IMAGES_PER_PAGE = 15;
+  const maxPage = Math.ceil(totalHitsAvailable / IMAGES_PER_PAGE);
+  if (page < maxPage) {
     showLoadMoreButton();
+  } else {
+    hideLoadMoreButton();
+  }
     form.reset();
   } catch (error) {
     iziToast.show({
@@ -107,16 +111,25 @@ const maxPage = Math.ceil(totalHitsAvailable / IMAGES_PER_PAGE);
     }
     const data = await getImagesByQuery(userInput, page);
     renderGallery(data.hits, true);
+
     const div = document.querySelector(".wrap");
     const divHeight = div.getBoundingClientRect().height;
     window.scrollBy({
-      top: divHeight * 6,
+      top: divHeight * 2,
       behavior: "smooth"
     });
     showLoadMoreButton();
     
   } catch (error) {
-    alert(error.message)
+    iziToast.show({
+    message: 'Sorry, something went wrong. Please try again!',
+    position: 'topRight',
+    messageColor: '#fff',
+    titleColor: '#fff',
+    color: '#ef4040',
+    iconUrl: './img/bi_x-octagon-2.svg',
+    maxWidth: 432
+  });
   } finally {
     hideLoaderMore();
   }
