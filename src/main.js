@@ -10,7 +10,7 @@ import {
   showLoadMoreButton,
   hideLoadMoreButton,
   hideLoaderMore,
-  showLoaderMore
+  showLoaderMore,
 } from './js/render-functions';
 
 const form = document.querySelector(".form");
@@ -94,9 +94,11 @@ async function onLoadMore() {
   hideLoadMoreButton();
   showLoaderMore();
   const IMAGES_PER_PAGE = 15;
-const maxPage = Math.ceil(totalHitsAvailable / IMAGES_PER_PAGE);
+  const maxPage = Math.ceil(totalHitsAvailable / IMAGES_PER_PAGE);
   try {
-    if (page > maxPage) {
+    console.log(page);
+    console.log(maxPage);
+    if (page >= maxPage) {
       iziToast.show({
       message: 'We are sorry, but you haveve reached the end of search results.',
       position: 'topRight',
@@ -110,15 +112,19 @@ const maxPage = Math.ceil(totalHitsAvailable / IMAGES_PER_PAGE);
       return
     }
     const data = await getImagesByQuery(userInput, page);
-    renderGallery(data.hits, true);
+    renderGallery(data.hits, { append: true });
 
-    const div = document.querySelector(".wrap");
-    const divHeight = div.getBoundingClientRect().height;
+    const galleryItem = document.querySelector(".gallery .wrap");
+  const cardHeight = galleryItem?.getBoundingClientRect().height || 0;
     window.scrollBy({
-      top: divHeight * 2,
+      top: cardHeight * 2,
       behavior: "smooth"
     });
-    showLoadMoreButton();
+    if (page < maxPage) {
+      showLoadMoreButton();
+    } else {
+      hideLoadMoreButton();
+    }
     
   } catch (error) {
     iziToast.show({

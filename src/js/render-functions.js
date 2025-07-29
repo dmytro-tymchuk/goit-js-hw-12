@@ -27,8 +27,10 @@ export function createMarkup(arr) {
   }).join("");
 }
 
-export function renderGallery(images, append = false) {
+export function renderGallery(images, options = {}) {
+  const { append = false } = options;
   const markup = createMarkup(images);
+
   if (append) {
     gallery.insertAdjacentHTML('beforeend', markup);
   } else {
